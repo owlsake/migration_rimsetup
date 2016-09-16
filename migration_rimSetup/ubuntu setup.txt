@@ -1,0 +1,290 @@
+Basic Command
+
+Change User:
+
+$ whoami
+user1
+$ su - user2
+Password:
+$ whoami
+user2
+$ exit
+logout
+
+======================================
+install ubuntu 14.04 LTS
+
+setup a VM
+
+source code: ubuntu-14.04.5-desktop-amd64.iso
+
+after installed, change display to 1280X800, system settings/displays
+
+install ubuntu updates/ system prompt
+
+
+
+-------------------------------
+chnage to root
+
+open termial: Ctrl + Alt + T
+
+sudo -i
+
+change root password
+
+$sudo passwd root
+type "paswword"
+-------------------------------
+install openssh server
+
+$sudo apt-get install openssh-server
+
+$sudo gedit /etc/ssh/sshd_config
+
+change : PermitRootLogin no yes
+
+$sudo service ssh restart
+
+WINSCP SFTP: use root to logon ubuntu
+
+check IP: ifconfig
+--------------------------------
+
+install webserver: Apache2
+
+$sudo apt-get install apache2
+
+check : http://localhost --> success ubuntu page
+
+$sudo /etc/init.d/apache2 restart
+--------------------------------
+
+install PHP 5.6 x 
+https://www.dev-metal.com/install-setup-php-5-6-ubuntu-14-04-lts/
+
+1. Add PHP 5.6 package sources to your system:
+
+sudo add-apt-repository ppa:ondrej/php5-5.6
+and confirm with ENTER. If you get an error here, you need to install python-software-properties first (and then do the line above again):
+
+sudo apt-get update
+sudo apt-get install python-software-properties
+2. Update
+
+sudo apt-get update
+3. Install PHP
+
+sudo apt-get install php5
+and confirm with ¡§y¡¨ and ENTER. You¡¦ll now already see ¡§PHP 5.6.x¡¨ in the scrolling installation logs. To properly check  the installed version of PHP do:
+
+apt-get install php5-dev
+
+php5 -v
+
+-------------------------------
+upload rim folder to /var/www/html
+
+
+-------------------------------- 
+install DB2 Data Server Driver
+
+connect to server via: winscp with root
+
+if denied access: then restart the ssh service => $sudo service ssh restart
+
+create a folder to upload:
+
+
+
+source code: v9.7fp11_linuxx64_dsdriver.tar.gz
+
+http://php.net/manual/en/ibm-db2.installation.php
+!! if CLI not found error, unzip again !! check if there are ruby, lib64, lib... folders under /opt/ibm/dsdriver. 
+
+STEP:
+#1- Install packages
+apt-get install php-pear ksh zip
+
+#2- Make directory
+mkdir /opt/ibm
+chmod -R 777 /opt/ibm
+
+#3- Download Data Server Driver Package (dsdriver), as the architecture
+(https://www-304.ibm.com/support/docview.wss?rs=4020&uid=swg27016878&wv=1)
+
+#4- Decompress dsdriver at /opt/ibm/
+tar -xvf v10.5fp1_linuxx64_dsdriver.tar.gz  (linux64)
+or
+tar -xvf v10.5fp1_linuxia32_dsdriver.tar.gz (linux32)
+
+#5- Change permission instalation script  -  /opt/ibm/dsdriver
+chmod 755 installDSDriver
+
+#6- Run the installation script 
+ksh installDSDriver
+
+#7- Download and install the driver using the pecl
+pecl install ibm_db2
+
+downloading ibm_db2-1.9.5.tgz ...
+Starting to download ibm_db2-1.9.5.tgz (157,720 bytes)
+................done: 157,720 bytes
+5 source files, building
+running: phpize
+Configuring for:
+PHP Api Version:         20090626
+Zend Module Api No:      20090626
+Zend Extension Api No:   220090626
+Note: if no phpize found, then install php5-dev: apt-get install php5-dev
+
+#8- Configure the installation directory
+DB2 Installation Directory? : /opt/ibm/dsdriver
+
+Build process completed successfully
+Installing '/usr/lib/php5/20090626/ibm_db2.so'
+install ok: channel://pecl.php.net/ibm_db2-1.9.5
+configuration option "php_ini" is not set to php.ini location
+You should add "extension=ibm_db2.so" to php.ini
+
+#9- Change php.ini
+vim /etc/php5/apache2/php.ini
+;;;;;;;;;;;;;;;;;;;;;;
+; Dynamic Extensions ;
+;;;;;;;;;;;;;;;;;;;;;;
+extension = ibm_db2.so
+extension = /usr/lib/php5/20090626/ibm_db2.so
+
+#10- Reboot the Apache service
+
+service apache2 restart
+or
+
+sudo /etc/init.d/apache2 restart
+-------------------------------- 
+check phpinfo:
+mddir /var/www/html/rim
+chmod -R 777 /var/www/html/rim
+
+upload phpinfo.php to /var/www/html/rim
+
+open browser: 192.168.216.136/rim/phpinfo.php
+if the page is not display correctly, check with php file => <?php .... ?>, must has php after ?
+
+check if ibm_db2.so has loaded in the page
+----------------------------------
+install zip.so
+source code: zip-1.13.4.tgz
+
+upload to server and at that folder install
+pear install zip-1.13.4.tgz
+
+add to php.ini => extension = zip.so 
+restart appache
+----------------------------------
+ISSUEs:
+".CurrentProjectTitle ().""); ?>
+
+updload the WCI¡@php.ini ==> from rim repository¡@(not figure out yet)
+
+now should be good : 192.168.215.136/rim/irim_login.php
+
+----------------------------------
+if unable export, check extensions
+
+find / -type d -name 20131226 <= extension folder from phpinfo
+/usr/lib/php5/20131226
+
+upload all wci required entensions to 20131226 folder
+restart apache => service apache2 restart
+
+if the export still not work => check folder permission=> grant rim 777 and all subfolders (rescursive)
+---------------
+chartdir
+check apache2 error.log
+/var/log/apache2
+
+
+---------
+install DB2 Client (option: if install sepearate system)
+
+v9.7fp11_linuxx64_client.tar.gz
+
+upload to /opt/ibm/
+tar -xvf v9.7fp11_linuxx64_client.tar.gz
+
+/opt/ibm/client/./db2setup
+
+
+sudo -u db2inst1 sh -c "/opt/ibm/db2/V9.7/bin/db2 connect to irim135 user irim using irim007; /opt/ibm/db2/V9.7/bin/db2 \" select count(*) from product with ur\" "
+
+http://unix.stackexchange.com/questions/42777/how-to-run-this-in-sudo
+
+------------------------
+
+install db2 express c
+
+http://www.tldp.org/HOWTO/DB2-HOWTO/installing.html
+
+ln -s libpam.so.0 libpam.so
+
+
+upload v11.1_linuxx64_expc.tar.gz to /opt/ibm
+
+$/opt/ibm tar zxf db2exc_912_LNX_x86.tar.gz
+
+$/opt/ibm/expc/./db2setup
+
+after install DB2
+sudo apt-get install libaio1
+
+and logout/in db2inst1
+
+
+-- good --
+https://bitsofinfo.wordpress.com/2009/09/09/installing-and-uninstalling-db2-9-express-c-on-a-headless-ubuntu-box-i-e-from-the-command-line/
+
+after install DB2 Express, find the ibm_db2.so
+
+$find / -type f -name ibm_db2*
+
+copy ibm_db2_5.3.6_ts.so to exntension folder (phpinfo) 20131226 /usr//php5/20131226
+change filename: $mv ibm_db2_5.3.6_ts.so ibm_db2.so
+
+restart apache
+
+find / -type f -name error.log
+
+-----------------------
+change: common_flag.php (connection)
+        irim_main.php
+-----------------------
+install wine
+https://wiki.winehq.org/Ubuntu
+If your system is 64 bit, enable 32 bit architecture (if you haven't already):
+
+sudo dpkg --add-architecture i386 
+Add the repository:
+
+sudo add-apt-repository ppa:wine/wine-builds
+Update packages:
+
+sudo apt-get update
+Then install (example for the development branch):
+
+sudo apt-get install --install-recommends winehq-devel
+
+*** After install Wine
+
+add www-data for wine and db2 in the sudoers file
+
+$gedit /etc/sudoers
+# User privilege specifiation
+root ALL=(ALL:ALL) ALL
+www-data ALL=(ALL:ALL) NOPASSWD: /opt/wine-devel/bin/wine
+www-data ALL=(ALL:ALL) NOPASSWD: /opt/ibm/db2/V11.1/bin/db2
+
+-----------------------
+ISSUES:
+#1: if not able to Export => check the var/html/www/rim permission chmod -R 777 rim
+#2 if import not successul, re-deploy f_check_dec.sql (functions)

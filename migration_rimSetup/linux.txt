@@ -1,0 +1,200 @@
+netstat -a | grep ftp
+
+change to root level
+sudo -i
+
+remove and purge
+
+sudo apt-get install vsftpd
+sudo apt-get remove vsftpd
+sudo apt-get purge vsftpd
+netstat -a | grep ftp
+sudo /etc/init.d/vsftpd restart
+
+
+find / -type d -name 'apache2'
+sudo /etc/init.d/apache2 restart
+check version
+lsb_release -a
+
+sudo passwd "username" --> change username as root
+reboot
+
+---
+visudo
+Find the following code:
+
+# User privilege specification
+root ALL=(ALL:ALL) ALL
+
+In this case, we’re granting root privileges to the user mynewuser. Add the following below that code:
+
+mynewuser ALL=(ALL:ALL) ALL
+
+Then exit and save the file with the key commands Ctrl-x, Y, enter.
+http://www.liquidweb.com/kb/how-to-add-a-user-and-grant-root-privileges-on-ubuntu-14-04/
+
+--
+$ sudo adduser bryan root
+Adding user `kev' to group `root' ...
+Adding user kev to group root
+Done.
+
+
+---
+
+install apache2
+
+sudo /etc/init.d/apache2 restart
+
+----
+install SSH
+?用root用?：sudo passwd root      //修改密?后就?用了。
+ 
+安?OpenSSH server：
+1. 使用apt命令安?openssh server
+$ sudo apt-get install openssh-server
+ 
+ 
+2. 可以? openssh server?行配置
+$ sudo vi /etc/ssh/sshd_config
+找到PermitRootLogin no一行，改?PermitRootLogin yes
+ 
+3. 重? openssh server
+$ sudo service ssh restart
+------
+
+install PHP 5.6 x 
+http://askubuntu.com/questions/761713/how-can-i-downgrade-from-php-7-to-php-5-6-on-ubuntu-16-04
+
+
+--- install php 5.3.10 x 
+sudo apt-get update
+
+sudo apt-get install php5 php5-common php5-cli php5-dev php5-mysql phpmyadmin php5-pgsql phppgadmin php5-gd php5-mcrypt php5-curl php-pear libapache2-mod-php5 php5-xdebug
+
+
+--- php good
+https://www.dev-metal.com/install-setup-php-5-6-ubuntu-14-04-lts/
+
+-- install ibm_db2
+http://php.net/manual/en/ibm-db2.installation.php
+
+missing phpize: sudo apt-get install php5-dev
+
+add ibm_db2.so extension in the php.ini
+
+----
+connect to db2c01 user db2inst1 using db2admin
+node: ndb2c01
+
+extract DDL:
+c:\db2look -d irim106 -e -z irim -t product -i irim -w irim007 -o product1.dll
+
+http://www.coctec.com/docs/net/show-post-68276.html
+db2look -d product-a -e -o product.sql
+db2move irim export
+---------------
+Import Data:
+FTP all Data to a Folder(/opt/ibm/irimExportedData)
+Logon irim Linux 
+under that folder: change irimExportedData permission to 777: chmod -R 777 /opt/ibm/irimExportedData
+irim@bryan-virtual-machine:/opt/ibm/irimExportedData$ db2move irim import
+
+
+$ db2 "create tablespace IRIM_NTX pagesize 32k managed by system using ('/data/irim_ntx/')" bufferpool irimbufpool
+
+import data to table (under uploaded files folder) => db2move irim import
+
+delpoy views
+C:\WCI\CVS\Online DEV\views>db2 -v -td@ -f scriptdb.sql
+
+deploy functions
+C:\WCI\CVS\Online DEV\functions>db2 -v -td@ -f scriptdb.sql
+
+deploy SP data by batch in CLI(if lost connection, need restart db2, (user:irim, db2=> db2start)
+C:\WCI\SWD\Migrate\irim_ubuntu\SP>sp1.bat
+C:\WCI\SWD\Migrate\irim_ubuntu\SP>sp1.bat
+C:\WCI\SWD\Migrate\irim_ubuntu\SP>sp1.bat
+-----------
+Create BufferPool:
+
+db2 => create bufferpool buffer_8k size 1024 pagesize 8k
+DB20000I  The SQL command completed successfully.
+db2 => select * from syscat.bufferpools
+
+BPNAME
+----------------------------------------------------------
+IBMDEFAULTBP
+BUFFER_8K
+
+Create TableSpace
+
+---
+CREATE REGULAR TABLESPACE SNCI001 IN DATABASE PARTITION GROUP
+IBMDEFAULTGROUP PAGESIZE 4096 MANAGED BY SYSTEM
+USING ('/opt/ibm/tmp_tbsp')
+EXTENTSIZE 8 PREFETCHSIZE 16 BUFFERPOOL IBMDEFAULTBP OVERHEAD 12.670000
+TRANSFERRATE 0.180000;
+
+--good-
+CREATE USER TEMPORARY TABLESPACE TEMP IN DATABASE PARTITION GROUP
+IBMDEFAULTGROUP PAGESIZE 4096 MANAGED BY SYSTEM
+USING ('/opt/ibm/tmp_tbsp')
+EXTENTSIZE 16 PREFETCHSIZE 16 BUFFERPOOL IBMDEFAULTBP OVERHEAD 12.670000
+TRANSFERRATE 0.180000;
+
+-- from CC
+CONNECT TO IRIM;
+CREATE  LARGE  TABLESPACE IRIM PAGESIZE 8 K  MANAGED BY AUTOMATIC STORAGE EXTENTSIZE 16 OVERHEAD 10.5 PREFETCHSIZE 16 TRANSFERRATE 0.14 BUFFERPOOL  BUFFER_8K ;
+CONNECT RESET;
+
+---------------
+** Create TableSpace (IRIM, IRIM_NTX, TEMP) from DB2 Control Center !!! Much easy !!
+
+--------------
+Load Table/Index DDL from DB2 CLP:
+C:\WCI\SWD\Migrate\irim_ubuntu>db2 -vtf online_irim_ddl.sql
+--------------
+
+check storegroup:
+select * from syscat.stogroups with ur
+
+check bufferpools:
+select * from syscat.bufferpools
+select  tbspace, bufferpoolid from syscat.tablespaces
+
+list tablespaces
+LIST TABLESPACE CONTAINERS FOR 2
+----------------
+After installed Express C
+
+**** DB2DIR = /opt/ibm/db2/V11.1/
+
+#3 useradd -m irim
+#10 DB2DIR/instance/db2icrt -a server -u db2fenc1 irim
+#15 login as irim
+#17 update database manager configuration using svcename db2c_irim (not sure)
+
+VERIFY:
+#1 Login as irim, the db2 instance owner
+#2 execute a db2 create database irim
+
+https://bitsofinfo.wordpress.com/2009/09/09/installing-and-uninstalling-db2-9-express-c-on-a-headless-ubuntu-box-i-e-from-the-command-line/
+
+DB2DIR/instance$ ./db2icrt -a server -u db2fenc1 irim
+
+------------------
+
+Sudo:
+sudo -u irim -i -- sh -c '/opt/ibm/db2/V11.1/bin/db2 connect to irim'
+<OK> 135
+bryan@bryan-virtual-mae:$ sudo -u db2inst1 -i -- sh -c '/opt/ibm/db2/V9.7/bin/db2 connect to irim135 user irim using irim007;/opt/ibm/db2/V9.7/bin/db2 select productname from product fetch first 10 rows only' 
+
+need to catalog irim141 (<=local Node: N141)
+irim@bryan-virtual-machine$ sudo -u irim -i -- sh -c "opt/ibm/db2/V11.1/bin/db2 connect to irim141 user irim using irim007; /opt/bim/db2/V11.1/bin/db2 select productname from product fetch first 5 rows only"
+
+load file test:
+irim@bryan-virtual-machine$ sudo -u irim -i -- sh -c "/opt/ibm/db2/V11.1/bin/db2 -f /var/www/html/rim/tmp/fcst_18826_load.sql"
+SP_IPLAN_FCST_LOAD_TO_FACT_DYNLVL (STEP 12) DEBUG
+*** need add php user (check phpinfo), in this case is : www-data
