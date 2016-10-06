@@ -1,3 +1,4 @@
+
 install ubuntu 14.04 LTS
 
 setup a VM
@@ -155,4 +156,11 @@ www-data ALL=(ALL:ALL) NOPASSWD: /opt/ibm/db2/V11.1/bin/db2
 ------------------------------------------------------------------------
 
 
+Test in the  console:
 
+$service apache2 start
+$db2start
+heep://localhost/rim/irim_login.php
+
+
+===========================================
